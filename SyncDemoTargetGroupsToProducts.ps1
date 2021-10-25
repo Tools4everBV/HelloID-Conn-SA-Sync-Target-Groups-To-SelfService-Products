@@ -473,6 +473,7 @@ function Compare-Join {
 # HelloId_Actions_Variables
 #region Action1
 $sciptAddGroupMember = @'
+#region functions
 function Add-DTGroupMember {
     [CmdletBinding()]
     param (
@@ -496,9 +497,7 @@ function Add-DTGroupMember {
         $PSCmdlet.ThrowTerminatingError($_)
     }
 }
-#endregion
 
-#region DemoTarget helper functions
 function Invoke-DTRestMethod {
     [CmdletBinding()]
     param (
@@ -539,7 +538,7 @@ function Invoke-DTRestMethod {
         $PSCmdlet.ThrowTerminatingError($_)
     }
 }
-#endregion
+#endregion functions
 
 try {
     Hid-Write-Status -Message  "Adding Group Member [$GroupMember] to Group [$groupname]" -Event Information
@@ -589,6 +588,7 @@ $Action1 = @{
 
 #region Action2
 $scriptRemoveGroupMember = @'
+#region functions
 function Remove-DTGroupMember {
     [CmdletBinding()]
     param (
@@ -612,8 +612,7 @@ function Remove-DTGroupMember {
         $PSCmdlet.ThrowTerminatingError($_)
     }
 }
-#endregion
-#region DemoTarget helper functions
+
 function Invoke-DTRestMethod {
     [CmdletBinding()]
     param (
@@ -654,7 +653,7 @@ function Invoke-DTRestMethod {
         $PSCmdlet.ThrowTerminatingError($_)
     }
 }
-#endregion
+#endregion functions
 
 try {
     Hid-Write-Status -Message  "Removing Group Member [$GroupMember] from Group [$groupname]" -Event Information
@@ -791,6 +790,12 @@ try {
         if ($TargetGroups.$uniqueProperty -eq $null) {
             throw "The specified unique property [$uniqueProperty] for the target system does exist as property in the groups"
         }
+    }
+    
+    if ($TargetGroups.Count -eq 0) {
+        Write-HidStatus -Message 'No Target Groups have been found' -Event Information
+    } else {
+        Write-HidStatus -Message "Found '$($TargetGroups.Count)' Target group(s)" -Event Information
     }
 
     $TargetGroups = $TargetGroups | Select-Object *, @{name = 'CombinedUniqueId'; expression = { $SKUPrefix + $_.$uniqueProperty } }
