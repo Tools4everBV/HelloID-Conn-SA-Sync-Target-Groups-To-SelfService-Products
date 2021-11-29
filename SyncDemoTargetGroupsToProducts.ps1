@@ -366,7 +366,7 @@ function Invoke-HIDRestmethod {
     param (
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
-        [Microsoft.PowerShell.Commands.WebRequestMethod]
+        [string]
         $Method,
 
         [Parameter(Mandatory)]
@@ -503,7 +503,7 @@ function Invoke-DTRestMethod {
     param (
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
-        [Microsoft.PowerShell.Commands.WebRequestMethod]
+        [string]
         $Method,
 
         [Parameter(Mandatory)]
@@ -618,7 +618,7 @@ function Invoke-DTRestMethod {
     param (
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
-        [Microsoft.PowerShell.Commands.WebRequestMethod]
+        [string]
         $Method,
 
         [Parameter(Mandatory)]
@@ -706,7 +706,7 @@ function Invoke-DTRestMethod {
     param (
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
-        [Microsoft.PowerShell.Commands.WebRequestMethod]
+        [string]
         $Method,
 
         [Parameter(Mandatory)]
