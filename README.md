@@ -27,7 +27,7 @@ To make use of this sync. You must create your own code to retrieve the groups o
 - [ ] Make sure you have Windows PowerShell 5.1 installed on the server where the HelloID agent and Service Automation agent are running.
   > The connector is compatible with older versions of Windows PowerShell. Although we cannot guarantuee the compatibility.
 
-- [ ] Define the Global Variable for you Target System
+- [ ] Define the Global Variables for your Target System
 
 - [ ] Making sure the product is configered to your requirements.
 
