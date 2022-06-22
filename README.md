@@ -42,9 +42,9 @@ The connection settings are defined in the automation variables [user defined va
 | $BaseUrl                      | HelloID Base Url                        | (Default Global Variable)    |
 | $portalApiKey                 | HelloID Api Key                         | (Default Global Variable)    |
 | $portalApiSecret              | HelloID Api Secret                      | (Default Global Variable)    |
-| $demoTargetUrl                | Target System Base Url                  | **Define as Global Varaible**  |
-| $demoTargetApiKey             | Target System Api Key                   | **Define as Global Varaible**  |
-| $demoTargetSecret             | Target System Api Secret                | **Define as Global Varaible**|
+| $demoTargetUrl                | Target System Base Url                  | **Define as Global Variable**  |
+| $demoTargetApiKey             | Target System Api Key                   | **Define as Global Variable**  |
+| $demoTargetSecret             | Target System Api Secret                | **Define as Global Variable**|
 | $ProductAccessGroup           | HelloID Product Access Group            | *If not found, the product is created without an Access Group* |
 | $ProductCategory              | HelloID Product Category                | *If the category is not found, it will be created* |
 | $SAProductResourceOwner       | HelloID Product Resource Owner Group    | *If left empty the groupname will be: "Resource owners [target-systeem] - [Product_Naam]")* |
