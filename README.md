@@ -55,8 +55,8 @@ The connection settings are defined in the automation variables [user defined va
 | $uniqueProperty               | Target Groups Unique Key                | The vaule will be used as CombinedUniqueId|
 | $SKUPrefix                    | HelloID SKU prefix                      | The prefix will be used as CombinedUniqueId |
 | $TargetSystemName             | HelloID Prefix of product description              | |
-| $Action1                      | HelloID Prodcut action1  *(Add-GroupMember)*        | |
-| $Action2                      | HelloID Prodcut action2  *(Remove-GroupMember)*   | |
+| $Action1                      | HelloID Product action1  *(Add-GroupMember)*        | |
+| $Action2                      | HelloID Product action2  *(Remove-GroupMember)*   | |
 | $TargetGroups                 | Target System List of Groups *(Get-DemoTargetLGroupList)*          | |
 
 
