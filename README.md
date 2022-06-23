@@ -18,7 +18,11 @@ By using this connector, you will have the ability to create HelloId SelfService
 
 It will manage only the products of the target system. The existing or manually created products are unmanaged and are excluded from the sync.
 
-To make use of this sync. You must create your own code to retrieve the groups of the target system. And adjust the HelloId actions so they fits to your target system.
+| :information_source: Information |
+|:---------------------------|
+| To make use of this sync. **You must create your own code** to retrieve the groups of the target system. And adjust the HelloId actions so they fits to your target system.
+|
+
 
 
 ## Getting started
