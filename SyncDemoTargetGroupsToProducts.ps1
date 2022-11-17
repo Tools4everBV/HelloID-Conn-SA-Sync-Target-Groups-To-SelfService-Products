@@ -23,6 +23,8 @@ $SAProductWorkflow = $null              # If empty. The Default HelloID Workflow
 $FaIcon = '500px'
 $removeProduct = $true                  # If False product will be disabled
 $productVisibility = 'All'
+$productReturnOnUserDisable    = $false # Indicates whether the product will be returned when the user owning the product gets disabled
+$productRequestCommentOption     = "Optional" #one of "Optional", "Required", "Hidden". Indicates whether a comment is optional, required or not possible when requesting
 
 #Target System Configuration
 $uniqueProperty = 'id'              # The vaule will be used as CombinedUniqueId
@@ -791,7 +793,7 @@ try {
             throw "The specified unique property [$uniqueProperty] for the target system does exist as property in the groups"
         }
     }
-    
+
     if ($TargetGroups.Count -eq 0) {
         Write-HidStatus -Message 'No Target Groups have been found' -Event Information
     } else {
@@ -877,6 +879,8 @@ try {
             CreateDefaultEmailActions  = $true
             Visibility                 = $productVisibility
             Code                       = "$SKUPrefix$($product.id)"
+            ReturnOnUserDisable        = $productReturnOnUserDisable
+            RequestCommentOption       = $productRequestCommentOption
         } | ConvertTo-Json
         $selfServiceProduct = Set-HIDSelfServiceProduct -ProductJson $productBody
 
