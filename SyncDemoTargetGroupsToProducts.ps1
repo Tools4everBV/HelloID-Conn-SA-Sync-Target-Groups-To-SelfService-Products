@@ -1,7 +1,7 @@
 #####################################################
 # HelloID-SA-Sync-DemoTargetGroups-To-Products
 #
-# Version: 1.0.0.0
+# Version: 1.0.1.0
 #####################################################
 $VerbosePreference = 'SilentlyContinue'
 $informationPreference = 'Continue'
@@ -12,13 +12,10 @@ $portalApiKey = $portalApiKey
 $portalApiSecret = $portalApiSecret
 $BaseUrl = $portalBaseUrl
 
-#Target Connection Configuration
-$demoTargetUrl = $DemoTargetUrl         # Needed for accessing the Target System (This variable is also used in the Actions of a Product)
-
 #HelloID Product Configuration
 $ProductAccessGroup = 'Users'           # If not found, the product is created without extra Access Group
 $ProductCategory = 'NewProductCateGory' # If the category is not found, it will be created
-$SAProductResourceOwner = ''            # If left empty the groupname will be: "Resource owners [target-systeem] - [Product_Naam]")
+$SAProductResourceOwner = ''            # If left empty the name will be: "Resource owners [target-systeem] - [Product_Naam]")
 $SAProductWorkflow = $null              # If empty. The Default HelloID Workflow is used. If specified Workflow does not exist the Product creation will raise an error.
 $FaIcon = '500px'
 $removeProduct = $true                  # If False product will be disabled
@@ -27,10 +24,10 @@ $productReturnOnUserDisable    = $false # Indicates whether the product will be 
 $productRequestCommentOption     = "Optional" #one of "Optional", "Required", "Hidden". Indicates whether a comment is optional, required or not possible when requesting
 
 #Target System Configuration
-$uniqueProperty = 'id'              # The vaule will be used as CombinedUniqueId
-$SKUPrefix = 'DT'                   # The prefix will be used as CombinedUniqueId
-$TargetSystemName = 'DemoTarget'
-#$ TargetGroups = Get-DTGroupList
+$uniqueProperty = 'id'              # The value will be used as the group identification part of the CombinedUniqueId
+$SKUPrefix = 'DT'                   # The prefix will be used as system indentification part of the CombinedUniqueId
+$TargetSystemName = 'DummyTarget'
+$debugRemoveAllProducts = $false    # set to $true for an one-time easy way to remove all products (with the same prefix). default value $false
 
 #region HelloID
 function Get-HIDDefaultAgentPool {
@@ -476,75 +473,26 @@ function Compare-Join {
 #region Action1
 $sciptAddGroupMember = @'
 #region functions
-function Add-DTGroupMember {
+function Add-TargetGroupMember {
     [CmdletBinding()]
     param (
         [Parameter()]
         [string]
-        $GroupName,
-
-        [Parameter()]
-        [String]
-        $GroupMemberEmailAddress
+        $GroupName
     )
-
     try {
         Write-Verbose "Invoking command '$($MyInvocation.MyCommand)'"
-        $splatRestParameters = @{
-            Method = 'PUT'
-            Uri    = "group/$GroupName/member/$GroupMemberEmailAddress"
-        }
-        Invoke-DTRestMethod @splatRestParameters
+        Hid-Write-Status -Message  "Todo: Write your own implementation to invoke the API of the actual Target system to add the groupmember" -Event Success
     } catch {
         $PSCmdlet.ThrowTerminatingError($_)
     }
 }
 
-function Invoke-DTRestMethod {
-    [CmdletBinding()]
-    param (
-        [Parameter(Mandatory)]
-        [ValidateNotNullOrEmpty()]
-        [string]
-        $Method,
-
-        [Parameter(Mandatory)]
-        [ValidateNotNullOrEmpty()]
-        [string]
-        $Uri,
-
-        [object]
-        $Body,
-
-        [string]
-        $ContentType = 'application/json'
-    )
-
-    try {
-        Write-Verbose 'Switching to TLS 1.2'
-        [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor [System.Net.SecurityProtocolType]::Tls12
-
-        $splatParams = @{
-            Uri         = "$demoTargetUrl/api/v1/$Uri"
-            Headers     = $headers
-            Method      = $Method
-            ContentType = $ContentType
-        }
-
-        if ($Body) {
-            $splatParams['Body'] = $Body
-        }
-
-        Invoke-RestMethod @splatParams
-    } catch {
-        $PSCmdlet.ThrowTerminatingError($_)
-    }
-}
 #endregion functions
 
 try {
     Hid-Write-Status -Message  "Adding Group Member [$GroupMember] to Group [$groupname]" -Event Information
-    Add-DTGroupMember -GroupName $groupname -GroupMemberEmailAddress $GroupMember
+    Add-TargetGroupMember -GroupName $groupname
 
     Hid-Write-Status -Message  "Successfully added group Member [$GroupMember] to Group [$groupname]" -Event Success
     Hid-Write-Summary -Message "Successfully added Group Member [$GroupMember] to Group [$groupname]" -Event Success
@@ -576,12 +524,6 @@ $Action1 = @{
             "value"          = "{{product.name}}"
             "typeConstraint" = "string"
             "secure"         = $false
-        },
-        @{
-            "name"           = "GroupMember"
-            "value"          = "{{requester.contactEmail}}"
-            "typeConstraint" = "string"
-            "secure"         = $false
         }
     )
 }
@@ -591,75 +533,26 @@ $Action1 = @{
 #region Action2
 $scriptRemoveGroupMember = @'
 #region functions
-function Remove-DTGroupMember {
+function Remove-TargetGroupMember {
     [CmdletBinding()]
     param (
         [Parameter()]
         [string]
-        $GroupName,
-
-        [Parameter()]
-        [String]
-        $GroupMemberEmailAddress
+        $GroupName
     )
-
     try {
         Write-Verbose "Invoking command '$($MyInvocation.MyCommand)'"
-        $splatRestParameters = @{
-            Method = 'DELETE'
-            Uri    = "group/$GroupName/member/$GroupMemberEmailAddress"
-        }
-        Invoke-DTRestMethod @splatRestParameters
+        Hid-Write-Status -Message  "Todo: Write your own implementation to invoke the API of the actual Target system to remove the groupmember" -Event Success
     } catch {
         $PSCmdlet.ThrowTerminatingError($_)
     }
 }
 
-function Invoke-DTRestMethod {
-    [CmdletBinding()]
-    param (
-        [Parameter(Mandatory)]
-        [ValidateNotNullOrEmpty()]
-        [string]
-        $Method,
-
-        [Parameter(Mandatory)]
-        [ValidateNotNullOrEmpty()]
-        [string]
-        $Uri,
-
-        [object]
-        $Body,
-
-        [string]
-        $ContentType = 'application/json'
-    )
-
-    try {
-        Write-Verbose 'Switching to TLS 1.2'
-        [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor [System.Net.SecurityProtocolType]::Tls12
-
-        $splatParams = @{
-            Uri         = "$demoTargetUrl/api/v1/$Uri"
-            Headers     = $headers
-            Method      = $Method
-            ContentType = $ContentType
-        }
-
-        if ($Body) {
-            $splatParams['Body'] = $Body
-        }
-
-        Invoke-RestMethod @splatParams
-    } catch {
-        $PSCmdlet.ThrowTerminatingError($_)
-    }
-}
 #endregion functions
 
 try {
     Hid-Write-Status -Message  "Removing Group Member [$GroupMember] from Group [$groupname]" -Event Information
-    Remove-DTGroupMember -GroupName $groupname -GroupMemberEmailAddress $GroupMember
+    Remove-TargetGroupMember -GroupName $groupname
 
     Hid-Write-Status -Message  "Successfully removed Group Member [$GroupMember] from Group [$groupname]" -Event Success
     Hid-Write-Summary -Message "Successfully removed Group Member [$GroupMember] from Group [$groupname]" -Event Success
@@ -690,12 +583,6 @@ $Action2 = @{
             "value"          = "{{product.name}}"
             "typeConstraint" = "string"
             "secure"         = $false
-        },
-        @{
-            "name"           = "GroupMember"
-            "value"          = "{{requester.contactEmail}}"
-            "typeConstraint" = "string"
-            "secure"         = $false
         }
     )
 }
@@ -703,65 +590,46 @@ $Action2 = @{
 #endregion Action2
 
 #region TargetSystem
-function Invoke-DTRestMethod {
-    [CmdletBinding()]
-    param (
-        [Parameter(Mandatory)]
-        [ValidateNotNullOrEmpty()]
-        [string]
-        $Method,
 
-        [Parameter(Mandatory)]
-        [ValidateNotNullOrEmpty()]
-        [string]
-        $Uri,
-
-        [object]
-        $Body,
-
-        [string]
-        $ContentType = 'application/json'
-    )
-    try {
-        Write-Verbose 'Switching to TLS 1.2'
-        [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor [System.Net.SecurityProtocolType]::Tls12
-
-        $splatParams = @{
-            Uri         = "$demoTargetUrl/api/v1/$Uri"
-            Headers     = $headers
-            Method      = $Method
-            ContentType = $ContentType
-        }
-        if ($Body) {
-            $splatParams['Body'] = $Body
-        }
-        Invoke-RestMethod @splatParams
-    } catch {
-        $PSCmdlet.ThrowTerminatingError($_)
-    }
-}
-
-function Get-DTGroupList {
+function Get-TargetGroupList {
     [CmdletBinding()]
     param()
     try {
         Write-Verbose "Invoking command '$($MyInvocation.MyCommand)'"
-        $splatRestParameters = @{
-            Method = 'GET'
-            Uri    = 'group'
+        # This function must provide a list of groups from the target system
+        # In this template it wil return a fixed hardcoded list
+        # Change this with a call to retrieve them from the actual system
+
+        $Group1 = [PSCustomObject]@{
+            id   = 1
+            name = "Firstgroup"
         }
-        Invoke-DTRestMethod @splatRestParameters
-    } catch {
+        $Group2 = [PSCustomObject]@{
+            id   = 2
+            name = "Secondgroup"
+        }
+        $Groups = [System.Collections.Generic.list[object]]::new()
+        $Groups.Add($Group1)
+        $Groups.Add($Group2)
+        return ,$Groups
+    }
+    catch {
         $PSCmdlet.ThrowTerminatingError($_)
     }
 }
+
 #endregion TargetSystem
 
 #region script
 try {
     #Target Groups!
-    $TargetGroups = Get-DTGroupList      # Gets the groups of the Target system
-    # $TargetGroups = $null              #easy way to remove all products
+    if ($debugRemoveAllProducts -eq $true) {
+        $TargetGroups = $null
+    }
+    else {
+        $TargetGroups = Get-TargetGroupList      # Gets the groups of the Target system
+    }
+
 
     #Adds the created Actions above in a list of Action. So you can extend the product easily with extra actions.
     $Actions = [System.Collections.Generic.list[object]]@()
@@ -787,7 +655,7 @@ try {
     #     $actions            # The HelloID actions which must be added to the HelloID product.
     # }
 
-    Write-HidStatus -Message 'Starting synchronization of DemoTargetSystem groups to HelloID products' -Event Information
+    Write-HidStatus -Message "Starting synchronization of $TargetSystemName groups to HelloID products" -Event Information
     if ($TargetGroups.count -gt 0) {
         if ($TargetGroups.$uniqueProperty -eq $null) {
             throw "The specified unique property [$uniqueProperty] for the target system does exist as property in the groups"
@@ -927,9 +795,9 @@ try {
     Write-HidStatus -Message 'Successfully synchronized Target System groups to HelloID products' -Event Success
     Write-HidSummary -Message 'Successfully synchronized Target System groups to HelloID products' -Event Success
 } catch {
-    Write-HidStatus -Message 'Error synchronization of DemoTargetSystem groups to HelloID products' -Event Error
+    Write-HidStatus -Message "Error synchronization of $TargetSystemName groups to HelloID products" -Event Error
     Write-HidStatus -Message "Exception message: $($_.Exception.Message)" -Event Error
     Write-HidStatus -Message "Exception details: $($_.errordetails)" -Event Error
-    Write-HidSummary -Message 'Error synchronization of DemoTargetSystem groups to HelloID products' -Event Failed
+    Write-HidSummary -Message "Error synchronization of $TargetSystemName groups to HelloID products" -Event Failed
 }
 #endregion

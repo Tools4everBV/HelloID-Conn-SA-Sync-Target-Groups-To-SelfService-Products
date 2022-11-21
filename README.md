@@ -20,9 +20,8 @@ It will manage only the products of the target system. The existing or manually 
 
 | :information_source: Information |
 |:---------------------------|
-| To make use of this sync. **You must create your own code** to retrieve the groups of the target system. And adjust the HelloId actions so they fits to your target system.
+| To make use of this sync. **You must create your own code** to retrieve the actual groups of target system and adjust the HelloId actions so they fit your target system.  The default implementation in this template will generate a static list of groups, and will log a placeholder message for the Add and Remove member actions
 |
-
 
 
 ## Getting started
@@ -33,7 +32,8 @@ It will manage only the products of the target system. The existing or manually 
 
 - [ ] Define the Global Variables for your Target System
 
-- [ ] Making sure the product is configered to your requirements.
+- [ ] Making sure the product is configured to your requirements.
+
 
 
 ### Connection settings
@@ -46,9 +46,6 @@ The connection settings are defined in the automation variables [user defined va
 | $BaseUrl                      | HelloID Base Url                        | (Default Global Variable)    |
 | $portalApiKey                 | HelloID Api Key                         | (Default Global Variable)    |
 | $portalApiSecret              | HelloID Api Secret                      | (Default Global Variable)    |
-| $demoTargetUrl                | Target System Base Url                  | **Define as Global Variable**  |
-| $demoTargetApiKey             | Target System Api Key                   | **Define as Global Variable**  |
-| $demoTargetSecret             | Target System Api Secret                | **Define as Global Variable**|
 | $ProductAccessGroup           | HelloID Product Access Group            | *If not found, the product is created without an Access Group* |
 | $ProductCategory              | HelloID Product Category                | *If the category is not found, it will be created* |
 | $SAProductResourceOwner       | HelloID Product Resource Owner Group    | *If left empty the groupname will be: "Resource owners [target-systeem] - [Product_Naam]")* |
@@ -67,12 +64,12 @@ The connection settings are defined in the automation variables [user defined va
 
 
 ## Remarks
-- The Products are only created and disable/deleted. No Update take place.
-> When a Product already exists, the prodcut will be skipped (no update will take place).
+- The Products are only created and disabled/deleted. No Update takes place.
+> When a Product already exists, the product will be skipped (no update will take place).
 
-- When the RemoveProduct switch is adjusted to remove the products. The products will be delete from HelloID instead of Disable. This will remove also the previous disabled products (by the sync).
+- When the RemoveProduct switch is adjusted to remove the products, the products will be deleted from HelloID instead of Disabled. This will remove also the previous disabled products (by the sync).
 
-- The code is prepared to make a function just to manage the HelloID Part of the selfservice Product, But not implemented.
+- This template uses a dummy target system. When retreiving the target system groups, it will always return a fixed list of groups, and when adding/removing memberships it will log a success message without modifying anything. You must modify the powershell code of these functions to perfom the operations on your actual target system.
 
 ## Getting help
 > _For more information on how to configure a HelloID PowerShell scheduled task, please refer to our [documentation](https://docs.helloid.com/hc/en-us/articles/115003253294-Create-Custom-Scheduled-Tasks) pages_
