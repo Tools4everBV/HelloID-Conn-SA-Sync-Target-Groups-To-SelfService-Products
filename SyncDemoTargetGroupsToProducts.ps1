@@ -387,7 +387,7 @@ function Invoke-HIDRestmethod {
         Write-Verbose 'Setting authorization headers'
         $apiKeySecret = "$($portalApiKey):$($portalApiSecret)"
         $base64 = [System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($apiKeySecret))
-        $headers = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
+        $headers = [System.Collections.Generic.Dictionary[[String], [String]]]::new()
         $headers.Add("Authorization", "Basic $base64")
         $headers.Add("Content-Type", $ContentType)
 
@@ -502,7 +502,8 @@ try {
         Hid-Write-Status -Message  $_.ErrorDetails -Event Error
     } elseif ($_.Exception.Response) {
         $result = $_.Exception.Response.GetResponseStream()
-        $reader = New-Object System.IO.StreamReader($result)
+        $reader = [System.IO.StreamReader]::new($result)
+        
         Hid-Write-Status -Message $reader.ReadToEnd()  -Event Error
         $reader.Dispose()
     }
@@ -562,7 +563,7 @@ try {
         Hid-Write-Status -Message  $_.ErrorDetails -Event Error
     } elseif ($_.Exception.Response) {
         $result = $_.Exception.Response.GetResponseStream()
-        $reader = New-Object System.IO.StreamReader($result)
+        $reader = [System.IO.StreamReader]::new($result)
         Hid-Write-Status -Message $reader.ReadToEnd()  -Event Error
         $reader.Dispose()
     }
