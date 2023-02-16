@@ -1,35 +1,29 @@
 #####################################################
 # HelloID-SA-Sync-DemoTargetGroups-To-Products
 #
-# Version: 1.0.1.0
+# Version: 1.0.2.0
 #####################################################
 $VerbosePreference = 'SilentlyContinue'
 $informationPreference = 'Continue'
 
-# Make sure to create the Global variables defined below in HelloID
-#HelloID Connection Configuration
-$portalApiKey = $portalApiKey
-$portalApiSecret = $portalApiSecret
-$BaseUrl = $portalBaseUrl
+# HelloID Product Configuration
+$ProductAccessGroup          = 'Users'              # If not found, the product is created without extra Access Group
+$ProductCategory             = 'NewProductCateGory' # If the category is not found, it will be created
+$SAProductResourceOwner      = ''                   # If left empty the name will be: "Resource owners [target-system] - [Product_Name]")
+$SAProductWorkflow           = $null                # If empty. The Default HelloID Workflow is used. If specified Workflow does not exist the Product creation will raise an error.
+$FaIcon                      = '500px'
+$removeProduct               = $true                # If False product will be disabled
+$productVisibility           = 'All'
+$productReturnOnUserDisable  = $false               # Indicates whether the product will be returned when the user owning the product gets disabled
+$productRequestCommentOption = "Optional"           # One of "Optional", "Required", "Hidden". Indicates whether a comment is optional, required or not possible when requesting
 
-#HelloID Product Configuration
-$ProductAccessGroup = 'Users'           # If not found, the product is created without extra Access Group
-$ProductCategory = 'NewProductCateGory' # If the category is not found, it will be created
-$SAProductResourceOwner = ''            # If left empty the name will be: "Resource owners [target-systeem] - [Product_Naam]")
-$SAProductWorkflow = $null              # If empty. The Default HelloID Workflow is used. If specified Workflow does not exist the Product creation will raise an error.
-$FaIcon = '500px'
-$removeProduct = $true                  # If False product will be disabled
-$productVisibility = 'All'
-$productReturnOnUserDisable    = $false # Indicates whether the product will be returned when the user owning the product gets disabled
-$productRequestCommentOption     = "Optional" #one of "Optional", "Required", "Hidden". Indicates whether a comment is optional, required or not possible when requesting
+# Target System Configuration
+$uniqueProperty         = 'id'          # The value will be used as the group identification part of the CombinedUniqueId
+$SKUPrefix              = 'DT'          # The prefix will be used as system identification part of the CombinedUniqueId
+$TargetSystemName       = 'DummyTarget'
+$debugRemoveAllProducts = $false        # set to $true for an one-time easy way to remove all products (with the same prefix). default value $false
 
-#Target System Configuration
-$uniqueProperty = 'id'              # The value will be used as the group identification part of the CombinedUniqueId
-$SKUPrefix = 'DT'                   # The prefix will be used as system indentification part of the CombinedUniqueId
-$TargetSystemName = 'DummyTarget'
-$debugRemoveAllProducts = $false    # set to $true for an one-time easy way to remove all products (with the same prefix). default value $false
-
-#region HelloID
+#region HelloID functions
 function Get-HIDDefaultAgentPool {
     <#
     .DESCRIPTION
@@ -61,8 +55,9 @@ function Get-HIDSelfServiceProduct {
     try {
         Write-Verbose "Invoking command '$($MyInvocation.MyCommand)'"
         $splatParams = @{
-            Method = 'GET'
-            Uri    = 'selfservice/products'
+            Method   = 'GET'
+            Uri      = 'selfservice/products'
+            PageSize = 50
         }
         Invoke-HIDRestMethod @splatParams
     } catch {
@@ -197,9 +192,6 @@ function Add-HIDGroupMemberActions {
     }
 }
 
-
-
-
 function New-HIDGroup {
     <#
     .DESCRIPTION
@@ -233,7 +225,6 @@ function New-HIDGroup {
         $Pscmdlet.ThrowTerminatingError($_)
     }
 }
-
 
 function Get-HIDGroup {
     <#
@@ -359,8 +350,7 @@ function Add-HIDUserGroup {
     }
 }
 
-
-function Invoke-HIDRestmethod {
+function Invoke-HIDRestMethod {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory)]
@@ -373,37 +363,60 @@ function Invoke-HIDRestmethod {
         [string]
         $Uri,
 
+        [Parameter()]
         [object]
         $Body,
 
+        [Parameter()]
         [string]
-        $ContentType = 'application/json'
+        $ContentType = 'application/json',
+
+        [Parameter()]
+        [int]
+        $PageSize
     )
 
     try {
-        Write-Verbose 'Switching to TLS 1.2'
         [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor [System.Net.SecurityProtocolType]::Tls12
 
-        Write-Verbose 'Setting authorization headers'
         $apiKeySecret = "$($portalApiKey):$($portalApiSecret)"
         $base64 = [System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($apiKeySecret))
-        $headers = [System.Collections.Generic.Dictionary[[String], [String]]]::new()
-        $headers.Add("Authorization", "Basic $base64")
-        $headers.Add("Content-Type", $ContentType)
+        $headers = [System.Collections.Generic.Dictionary[[String],[String]]]::new()
+        $headers.Add('Authorization', "Basic $base64")
+        $headers.Add('Content-Type', $ContentType)
 
         $splatParams = @{
-            Uri     = "$BaseUrl/api/v1/$Uri"
+            Uri     = "$portalBaseUrl/api/v1/$Uri"
             Headers = $headers
             Method  = $Method
         }
 
         if ($Body) {
-            Write-Verbose 'Adding body to request'
             $splatParams['Body'] = $Body
         }
 
-        Write-Verbose "Invoking '$Method' request to '$Uri'"
-        Invoke-RestMethod @splatParams
+        if ($PageSize){
+            $objectList = [System.Collections.Generic.List[object]]::new()
+            $take = $PageSize
+            $skip = 0
+
+            $splatParams['Uri'] = "$portalBaseUrl/api/v1/$Uri" + "?skip=$skip&take=$take"
+            $splatParams['Method'] = 'GET'
+            $responseObject = Invoke-RestMethod @splatParams
+            $objectList.Add($responseObject)
+            $skip += $take
+            while($responseObject.Count -eq $take){
+                $splatParams['Uri'] = "$portalBaseUrl/api/v1/$Uri" + "?skip=$skip&take=$take"
+                $responseObject = Invoke-RestMethod @splatParams
+                $skip += $take
+                $objectList.AddRange($responseObject)
+            }
+            $results = $objectList
+        } else {
+            $results = Invoke-RestMethod @splatParams
+        }
+
+        Write-Output $results
     } catch {
         $PSCmdlet.ThrowTerminatingError($_)
     }
@@ -466,8 +479,7 @@ function Compare-Join {
     }
     Write-Output $Left , $Right, $common
 }
-
-#endregion HelloID
+#endregion HelloID functions
 
 # HelloId_Actions_Variables
 #region Action1
@@ -487,7 +499,6 @@ function Add-TargetGroupMember {
         $PSCmdlet.ThrowTerminatingError($_)
     }
 }
-
 #endregion functions
 
 try {
@@ -503,7 +514,7 @@ try {
     } elseif ($_.Exception.Response) {
         $result = $_.Exception.Response.GetResponseStream()
         $reader = [System.IO.StreamReader]::new($result)
-        
+
         Hid-Write-Status -Message $reader.ReadToEnd()  -Event Error
         $reader.Dispose()
     }
@@ -528,7 +539,6 @@ $Action1 = @{
         }
     )
 }
-
 #endregion Action1
 
 #region Action2
@@ -548,7 +558,6 @@ function Remove-TargetGroupMember {
         $PSCmdlet.ThrowTerminatingError($_)
     }
 }
-
 #endregion functions
 
 try {
@@ -587,11 +596,9 @@ $Action2 = @{
         }
     )
 }
-
 #endregion Action2
 
 #region TargetSystem
-
 function Get-TargetGroupList {
     [CmdletBinding()]
     param()
@@ -618,7 +625,6 @@ function Get-TargetGroupList {
         $PSCmdlet.ThrowTerminatingError($_)
     }
 }
-
 #endregion TargetSystem
 
 #region script
