@@ -748,7 +748,7 @@ try {
             IsCommentable              = $true
             HasTimeLimit               = $false
             LimitType                  = 'Fixed'
-            ManagerCanOverrideDuration = $true
+            ManagerCanOverrideDuration = $false
             ReminderTimeout            = 30
             OwnershipMaxDuration       = 90
             CreateDefaultEmailActions  = $true
@@ -808,3 +808,4 @@ try {
     Write-HidSummary -Message "Error synchronization of $TargetSystemName groups to HelloID products" -Event Failed
 }
 #endregion
+
